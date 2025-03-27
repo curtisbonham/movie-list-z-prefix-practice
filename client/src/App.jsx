@@ -92,11 +92,6 @@ useEffect(()=> {
         movie.id === id ? { ...movie, watched: !movie.watched } : movie
       )
     )
-    // setFilteredMovies((prevMovies) =>
-    //   prevMovies.map((movie) =>
-    //     movie.id === id ? { ...movie, watched: !movie.watched } : movie
-    //   )
-    // )
   }
 
   return (
