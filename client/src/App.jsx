@@ -10,6 +10,7 @@ export default function App() {
   const savedMovies = localStorage.getItem('userMovies')
   return savedMovies ? JSON.parse(savedMovies) : []
 })
+const [selectedMovie, setSelectedMovie] = useState(null)
 
 //Saves the movies to local storage
 useEffect(()=> {
@@ -94,6 +95,11 @@ useEffect(()=> {
     )
   }
 
+  //Handles clicking the title
+  const handleTitleClick = (movie) => {
+    setSelectedMovie(movie)
+  }
+
   return (
 <>
     <div>
@@ -125,18 +131,26 @@ useEffect(()=> {
       <div>
         {filteredMovies?.map((movie, index) => (
         <div key={index}>
-          <h2>
-            {movie.title}{' '}
-            <button onClick={() => handleDeleteMovie(movie.id)}>Delete</button>
-            <button onClick={() => toggleWatched(movie.id)}>
-              {movie.watched ? 'Mark as Unwatched' : 'Mark as Watched'}
-              </button>
-            </h2>
-            <p>Status: {movie.watched ? 'Watched' : 'Unwatched'}</p>
+          <h2 style={{cursor: 'pointer', color: 'black'}}
+            onClick={() => handleTitleClick(movie)}>
+            {movie.title}
+
+          </h2>
         </div>
-      ))
-      }
+      ))}
     </div>
+    {selectedMovie && (
+      <div style={{border: '1px solid black', padding: '10px', marginTop: '20px'}}>
+        <h3>Movie Details</h3>
+        <p><strong>Title:</strong>{selectedMovie.title}</p>
+        <p><strong>Status:</strong>{selectedMovie.watched ? 'Watched' : 'Unwatched'}</p>
+        <button onClick={() => setSelectedMovie(null)}>Close</button>
+        <button onClick={() => toggleWatched(selectedMovie.id)}>
+              {selectedMovie.watched ? 'Mark as Unwatched' : 'Mark as Watched'}
+        </button>
+        <button onClick={() => handleDeleteMovie(selectedMovie.id)}>Delete</button>
+      </div>
+    )}
     </div>
   </>
   )
