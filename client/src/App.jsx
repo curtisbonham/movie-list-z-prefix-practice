@@ -62,20 +62,40 @@ useEffect(()=> {
 //Handles adding a new movie by the user
   const handleAddMovie = async () => {
     if (newMovie) {
-      const response = await fetch('http://localhost:3001/movies', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({title: newMovie})
-      })
-      const data = await response.json()
-      const newToggledMovie = {...data, watched: false}
-      setUserMovies((prevMovies) => [...prevMovies, newToggledMovie])
-      setFilteredMovies((prevMovies) => [...prevMovies, newToggledMovie])
-      setNewMovie('')
+      try{
+        const ApiKey = process.env.REACT_APP_TMDB_API_KEY
+        const response = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${ApiKey}&query=${newMovie}`)
+        const dbData = await response.json()
+
+          if(dbData.results && dbData.results.length > 0) {
+            const movieDetails = dbData.results[0]
+          const response = await fetch('http://localhost:3001/movies', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              title: movieDetails.title,
+              releaseDate: movieDetails.release_date,
+              overview: movieDetails.overview,
+              posterPath: movieDetails.poster_path,
+             watched: false,
+          }),
+        })
+          const data = await response.json()
+          const newToggledMovie = {...data, watched: false}
+          setUserMovies((prevMovies) => [...prevMovies, newToggledMovie])
+          setFilteredMovies((prevMovies) => [...prevMovies, newToggledMovie])
+          setNewMovie('')
+        } else {
+          alert('Movie not found on TMDb')
+        }
+    } catch (error) {
+      console.error('Error adding movie:', error)
+      alert('Failed to fetch movie details. Please try again.')
     }
   }
+}
 
   //Handles deleting a movie by the user
   const handleDeleteMovie = async (id) => {
@@ -142,8 +162,17 @@ useEffect(()=> {
     {selectedMovie && (
       <div style={{border: '1px solid black', padding: '10px', marginTop: '20px'}}>
         <h3>Movie Details</h3>
-        <p><strong>Title:</strong>{selectedMovie.title}</p>
-        <p><strong>Status:</strong>{selectedMovie.watched ? 'Watched' : 'Unwatched'}</p>
+        <p><strong>Title: </strong>{selectedMovie.title}</p>
+        <p><strong>Release Date: </strong>{selectedMovie.releaseDate}</p>
+        <p><strong>Overview: </strong>{selectedMovie.overview}</p>
+        {selectedMovie.posterPath && (
+          <img
+            src={`https://image.tmdb.org/t/p/w500${selectedMovie.posterPath}`}
+            alt={selectedMovie.title}
+            style={{width: '200px', height: '300px'}}
+            />
+        )}
+        <p><strong>Status: </strong>{selectedMovie.watched ? 'Watched' : 'Unwatched'}</p>
         <button onClick={() => setSelectedMovie(null)}>Close</button>
         <button onClick={() => toggleWatched(selectedMovie.id)}>
               {selectedMovie.watched ? 'Mark as Unwatched' : 'Mark as Watched'}

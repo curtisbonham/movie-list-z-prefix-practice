@@ -4,8 +4,12 @@
  */
 exports.up = function(knex) {
   return knex.schema.createTable('movies', table => {
-    table.increments();
-    table.string('title');
+    table.increments()
+    table.string('title')
+    table.string('releaseDate')
+    table.text('overview')
+    table.string('posterPath')
+    table.boolean('watched').defaultTo(false)
   })
 
 };
